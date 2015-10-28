@@ -4,7 +4,7 @@
   "description": "Tessel project",
   "main": "bp.js",
   "dependencies": {
-    "backpack-ht16k33": "~0.2.1"
+    "backpack-ht16k3": "https://github.com/flaki/backpack-ht16k33.git#t2"
   },
   "devDependencies": {},
   "scripts": {
