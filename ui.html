@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DRAW!</title>
+    <style>
+      body { padding: 0; margin: 0; }
+
+    </style>
+  </head>
+
+  <body>
+    <canvas id="draw">
+    </canvas>
+    <script>
+      window.bitmap = window.bitmap || [
+        [0,0,1,1,1,1,0,0],
+        [0,1,0,0,0,0,1,0],
+        [1,0,1,0,0,1,0,1],
+        [1,0,0,0,0,0,0,1],
+        [1,0,1,0,0,1,0,1],
+        [1,0,0,1,1,0,0,1],
+        [0,1,0,0,0,0,1,0],
+        [0,0,1,1,1,1,0,0],
+      ];
+
+      var canvas = document.getElementById("draw");
+      canvas.width = canvas.height = Math.min(window.innerWidth,window.innerHeight);
+      bs = Math.floor( canvas.width / 8 );
+
+      var C = canvas.getContext("2d");
+
+      var newstate;
+      function postState() {
+        if (newstate) {
+          var r = new XMLHttpRequest();
+          r.open("POST", "/"+newstate);
+          r.onreadystatechange = function () { if (r.readyState != 4 || r.status != 200) return; };
+          r.send("");
+        }
+        newstate = "";
+      }
+
+      function display() {
+        var x,y;
+
+        y = 0;
+        while (y < 8) {
+          x = 0;
+          while (x < 8) {
+            if (bitmap[y][x]) {
+              C.fillRect(bs*x,bs*y, bs-1,bs-1);
+            } else {
+              C.clearRect(bs*x,bs*y, bs-1,bs-1);
+            }
+            ++x;
+          }
+          ++y;
+        }
+
+        window.requestAnimationFrame(display);
+        if (newstate) {
+          window.requestAnimationFrame(postState);
+        }
+      }
+
+      function getDXY(x,y) {
+        return { x: Math.floor(x/bs), y: Math.floor(y/bs) };
+      }
+
+      var lastupdate;
+      function update(e) {
+        var x = e.changedTouches[0].pageX;
+        var y = e.changedTouches[0].pageY;
+
+        var dxy = getDXY(x,y);
+        if (lastupdate && lastupdate.x == dxy.x && lastupdate.y == dxy.y ) return;
+        console.log(dxy, bitmap[dxy.y][dxy.x], bitmap[dxy.y][dxy.x]?0:1);
+
+        bitmap[dxy.y][dxy.x] = bitmap[dxy.y][dxy.x]?0:1;
+        lastupdate = dxy;
+
+        newstate = bitmap.reduce(function(a,b) { return a+b.join(""); },"");
+      }
+      function updateEnd(e) {
+        lastupdate = null;
+      }
+
+      canvas.addEventListener("touchstart", update, false);
+      canvas.addEventListener("touchend",   updateEnd, false);
+      canvas.addEventListener("touchmove",  update, false);
+
+      window.requestAnimationFrame(display);
+      </script>
+  </body>
+</html>

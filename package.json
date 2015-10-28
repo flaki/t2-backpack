@@ -1,0 +1,18 @@
+{
+  "name": "t2-backpacktest",
+  "version": "0.0.0",
+  "description": "Tessel project",
+  "main": "bp.js",
+  "dependencies": {
+    "backpack-ht16k33": "~0.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "keywords": [
+    "Tessel"
+  ],
+  "license": "MIT"
+}
