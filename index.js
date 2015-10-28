@@ -15,16 +15,27 @@ var bitmap = [
 var backpackready = false;
 backpack.on('ready', function() {
   backpackready = true;
-  backpack.clear();
+
+  // Minimum brightness (level 0)
+  setBackpackBrightness(0);
+
+  // Put the default image on the backpack after init complete
+  updateBackpack();
 });
 
-function updateBackpack () {
-  if (!backpackready) setTimeout(updateBackpack, 100);
+function updateBackpack() {
+  // Backpack not ready, automatically try again a bit later
+  if (!backpackready) return setTimeout(updateBackpack, 100);
 
   // Flip row pixel data to fix display mirroring
   backpack.writeBitmap(
     bitmap.map(function(row) { return row.reverse(); })
   );
+}
+
+// Set brightness of the backpack leds (between 0 (dimmest) and 15 (brightest))
+function setBackpackBrightness(brightness_level) {
+  backpack.i2c.send(new Buffer([ 0xE0 | (brightness_level & 0x0F) ]));
 }
 
 
@@ -43,9 +54,10 @@ http.createServer(function (req, res) {
   if (uri.length>1) {
     if (uri.length<65) uri += "0".repeat(65-uri.length);
     bitmap = uri.substring(1,65).match(/.{1,8}/g).reduce(function(a,b) { a.push(b.split("").map(function(v){ return parseInt(v,10); })); return a; },[]);
-    console.log(bitmap);
-    updateBackpack();
   }
+
+  console.log(bitmap);
+  updateBackpack();
 
   res.writeHead(200, {"Content-Type": "text/html"});
   res.end(uri.length>1 ? uri : ui.replace("= window.bitmap","="+JSON.stringify(bitmap)));
