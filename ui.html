@@ -70,6 +70,7 @@
       }
 
       var lastupdate;
+      var paintstate;
       function update(e) {
         var x = e.changedTouches[0].pageX;
         var y = e.changedTouches[0].pageY;
@@ -78,13 +79,24 @@
         if (lastupdate && lastupdate.x == dxy.x && lastupdate.y == dxy.y ) return;
         console.log(dxy, bitmap[dxy.y][dxy.x], bitmap[dxy.y][dxy.x]?0:1);
 
-        bitmap[dxy.y][dxy.x] = bitmap[dxy.y][dxy.x]?0:1;
+        // Draw or Erase on whole stroke depending on pixel under finger
+        // on the initial touch
+        if (!paintstate) {
+          paintstate = bitmap[dxy.y][dxy.x] ? "erase" : "paint";
+        }
+
+        // Update pixel under finger according to current paint state
+        bitmap[dxy.y][dxy.x] = paintstate === "paint" ? 1 : 0;
+
         lastupdate = dxy;
 
         newstate = bitmap.reduce(function(a,b) { return a+b.join(""); },"");
       }
       function updateEnd(e) {
         lastupdate = null;
+
+        // Reset paint state
+        paintstate = null;
       }
 
       canvas.addEventListener("touchstart", update, false);
