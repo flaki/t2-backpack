@@ -15,16 +15,19 @@ var bitmap = [
 var backpackready = false;
 backpack.on('ready', function() {
   backpackready = true;
-  backpack.clear();
+  //backpack.clear();
+  updateBackpack();
 });
 
-function updateBackpack () {
-  if (!backpackready) setTimeout(updateBackpack, 100);
+function updateBackpack() {
+  if (!backpackready) return setTimeout(updateBackpack, 100);
 
   // Flip row pixel data to fix display mirroring
+  console.log("b:"+bitmap[0][2]);
   backpack.writeBitmap(
     bitmap.map(function(row) { return row.reverse(); })
   );
+  console.log("a:"+bitmap[0][2]);
 }
 
 
@@ -43,10 +46,10 @@ http.createServer(function (req, res) {
   if (uri.length>1) {
     if (uri.length<65) uri += "0".repeat(65-uri.length);
     bitmap = uri.substring(1,65).match(/.{1,8}/g).reduce(function(a,b) { a.push(b.split("").map(function(v){ return parseInt(v,10); })); return a; },[]);
-    console.log(bitmap);
     updateBackpack();
   }
 
+  console.log(bitmap,JSON.stringify(bitmap));
   res.writeHead(200, {"Content-Type": "text/html"});
   res.end(uri.length>1 ? uri : ui.replace("= window.bitmap","="+JSON.stringify(bitmap)));
 }).listen(80);
