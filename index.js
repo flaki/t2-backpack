@@ -20,7 +20,11 @@ backpack.on('ready', function() {
 
 function updateBackpack () {
   if (!backpackready) setTimeout(updateBackpack, 100);
-  backpack.writeBitmap(bitmap);
+
+  // Flip row pixel data to fix display mirroring
+  backpack.writeBitmap(
+    bitmap.map(function(row) { return row.reverse(); })
+  );
 }
 
 
